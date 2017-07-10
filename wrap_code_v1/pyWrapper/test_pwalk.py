@@ -25,7 +25,3 @@ print dikinSamples
 vaidyaSamples = pwalk.generateVaidyaWalkSamples(initialization, A, b, r, nb_samples)
 
 print vaidyaSamples
-
-johnSamples = pwalk.generateJohnWalkSamples(initialization, A, b, r, nb_samples)
-
-print johnSamples
