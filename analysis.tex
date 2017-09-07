@@ -1,0 +1,612 @@
+%!TEX root = main.tex
+
+
+\section{Analysis of Vaidya walk} % (fold)
+\label{sec:proof}
+
+In this section, we first provide an outline of a general method of bounding the rate of convergence of geometric random walks on convex sets in Section~\ref{sub:a_general_method_to_bound_mixing_time}, followed by some auxiliary results in Section~\ref{sub:some_auxiliary_results} that are used to invoke the general method in our case.
+Using these auxiliary results, we first contrast the differences between Dikin walk and Vaidya walk in Section~\ref{sub:vaidya_vs_dikin}, and then prove our main result in Section~\ref{sub:proof_of_theorem_thm:mixing_time_bound}.
+ % and \ref{sub:proof_of_theorem_thm:central_start}.
+We provide the proofs of the auxiliary results in Sections~\ref{sub:proof_of_lemma_lemma:lovasz_theorem}, \ref{ssub:proof_of_lemma_lemma:first_bounds} and \ref{ssub:proof_of_lemma_lemma:vaidya_walk_close_kernel}, and defer some technical results to appendices.
+
+\subsection{A general method to bound mixing time} % (fold)
+\label{sub:a_general_method_to_bound_mixing_time}
+
+For a discrete-space Markov chain, a bound on mixing time is obtained via bounds on the \emph{spectral gap} of the transition matrix associated with the chain.
+Often, an indirect bound on the spectral gap is obtained via Cheeger's inequality that bounds the spectral gap in terms of the \emph{conductance} of the chain.
+Lov{\'a}sz and Simonovits~\cite{lovasz1993random} proved a similar connection between conductance and convergence rate for continuous-space Markov chains.
+Thus proving an upper bound for the mixing time of a geometric random walk on convex sets often boils down to showing a good lower bound on the conductance of the chain---these arguments have been used for ball walk~\cite{lovasz1990ballwalk}, Hit-and-run~\cite{lovasz1999hit,lovasz2006hit} and Dikin walk~\cite{narayanan2016randomized,kannan2012random,sachdeva2016mixing} on convex sets.
+When the underlying space is convex and bounded, using some isoperimetric inequalities, Lovasz showed that to get a lower bound on the conductance of the Markov chain with stationary distribution uniform, it suffices to establish that the chain satisfies the following good-neighborhood-property: ``if two points are close, then their one-step transition distribution are also close.''
+The mixing time of the chain roughly scales with the square of the inverse of ``how close the two-points need to be'' in order for their one-step transition distributions to be close.
+We show that for Vaidya walk when compared to Dikin walk, the points can be much far apart, with their one-step transition distributions still being close.
+Consequently, our walk mixes faster than Dikin walk.
+Much of our work focuses on quantifying the last claim formally.
+We restrict our attention to formalizing the ``good-neighborhood-property'', and refer the reader to the survey by Vempala~\cite{vempala2005geometric} for a more thorough and formal discussion about the usual techniques and the proofs of other arguments that have been summarized above.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[h]{0.45\linewidth}
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/polytope}
+    \caption{}
+    \label{fig:basic_polytope}
+  \end{subfigure}
+  \begin{subfigure}[h]{0.45\linewidth}
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/cross-ratio}
+    \caption{}
+    \label{fig:cross_ratio}
+  \end{subfigure}
+  \caption{Polytope $\Pspace = \{x\in \realdim\vert Ax \leq b \}$.
+  (a)~The points $e(x)$ and $e(y)$ denote the intersection points of the chord joining $x$ and $y$ with $\Pspace$ such that $e(x), x, y, e(y)$ are in order.
+  (b)~A geometric illustration of the argument~\eqref{eq:relate_cross_ratio}. It is straightforward to observe that ${\vecnorm{x-y}{2}}/{\vecnorm{e(x)-x}{2}} = {\vecnorm{u-y}{2}}/{\vecnorm{u-v}{2}} = {\abss{a_i\tp(y-x)}}/\parenth{b_i-a_i\tp x}$.
+  }
+  \label{fig:polytope_and_end_points}
+\end{figure}
+
+We now present a formal statement of the good-neighborhood-property for a random walk on a bounded convex set.
+For quantifying closeness in the property, the distributions are contrasted with the total-variation distance, while for distance between points we use the cross ratio, that we define next.
+For a given pair of points $x, y \in \Pspace$, let $e(x), e(y) \in \partial \Pspace$ denote the intersection of the chord joining $x$ and $y$ with $\Pspace$ such that $e(x), x, y, e(y)$ are in order (see Figure~\ref{fig:basic_polytope}).
+The cross-ratio $d_\Pspace(x, y)$ is given by
+\begin{align}
+\label{eq:def_cross_ratio}
+	d_\Pspace(x, y) = \frac{ \vecnorm{e(x)-e(y)}{2} \vecnorm{x-y}{2} }{ \vecnorm{e(x)-x}{2} \vecnorm{e(y)-y}{2} }.
+\end{align}
+The ratio $d_\Pspace(x, y)$ is related to the Hilbert metric on $\Pspace$, which is given by $\log \parenth{ 1+d_\Pspace(x, y)}$ (see the paper by Bushell \cite{bushell1973hilbert} for more details).
+
+Let $X_0, X_1, \ldots $ denote a \emph{lazy} reversible random walk on a bounded convex set $\Pspace$ with transition kernel $\lazytrans :x\mapsto \delta_x(\cdot)/2 + \nolazytrans_x(\cdot)/2$ and stationary with respect to the uniform distribution on $\Pspace$ (denoted by $\stationary$).
+The following lemma gives a bound on the mixing-time of the chain $\{X_t, t\geq 0\}$.
+\begin{lemma}
+	\label{lemma:Lovasz_theorem}
+	Suppose that $\vecnorm{\nolazytrans_x- \nolazytrans_y}{\text{TV}} \leq 1 - \rho$, for all $x, y \in \intP$ such that $d_\Pspace(x, y)~< \Delta $, for some $\rho,\Delta \in (0, 1)$.
+	Then for every distribution $\initial$ that is $M$-warm with respect to $\stationary$, we have
+	\begin{align*}
+		\vecnorm{\initial \lazytrans^k-\stationary}{\text{TV}} \leq \displaystyle\sqrt{M}\exp\parenth{-k\,\frac{\Delta^2 \rho^2}{512}}.
+	\end{align*}
+\end{lemma}
+The proof of the lemma follows from an isoperimetry inequality involving cross-ratio~\cite{lovasz1999hit} and the classical mixing time bound in terms of conductance~\cite{lovasz1993random}.
+Similar results have also been used in the proofs of Hit-and-run and Dikin walk.
+We provide the proof of the lemma in Section~\ref{sub:proof_of_lemma_lemma:lovasz_theorem}.
+To prove Theorem~\ref{thm:mixing_time_bound}, we show that the random walk \VW{1/9000} satisfies the assumptions of Lemma~\ref{lemma:Lovasz_theorem} with suitable $\Delta$ and $\rho$ which yields the claimed mixing time bound.
+Besides Lemma~\ref{lemma:Lovasz_theorem}, our proof techniques are inspired by the proofs of convergence rate of Dikin walk on polytopes presented by Kannan~\etal~\cite{kannan2012random}
+and the simple proof of Dikin walk provided by Sachdeva~\etal~\cite{sachdeva2016mixing}.
+
+% subsection a_general_method_to_bound_mixing_time (end)
+
+\subsection{Some auxiliary results} % (fold)
+\label{sub:some_auxiliary_results}
+We now introduce some notation and auxiliary results that will be useful for the proof.
+For all $x \in \Pspace$ let $\slack_{x} \defn (b_1-a_1\tp x, \ldots, b_\obs - a_\obs\tp x)\tp$ denote the ``slackness at $x$''.
+For all $x\in \intP$, define the ``local norm at $x$'' as
+\begin{subequations}
+\begin{align}
+	\vecnorm{.}{x} : v \mapsto \vecnorm{\vaidyaW_x^{1/2}y}{2} = \sqrt{\sum_{i=1}^\obs (\lev_{x, i}+\offset)\frac{(a_i^\top v)^2}{\slack_{x, i}^2}},
+	\label{eq:def_local_norm}
+\end{align}
+and the ``slack sensitivity at $x$'' as
+\begin{align}
+	\thetaW_{x} \defn \parenth{\vecnorm{\frac{a_1}{\slack_{x, 1}}}{x}^2, \ldots, \vecnorm{\frac{a_\obs}{\slack_{x, \obs}}}{x}^2}\tp
+	= \parenth{\frac{a_1^\top \vaidyaW_x^{-1}a_1}{\slack_{x, 1}^2} , \ldots, \frac{a_\obs^\top \vaidyaW_x^{-1}a_\obs}{\slack_{x, \obs}^2} }\tp.
+	\label{eq:theta_Definition}
+\end{align}
+\end{subequations}
+
+The following lemma provides useful properties of the leverage scores $\lev_{x}$~\eqref{eq:defn_lev_scores} and the slack sensitivity $\thetaW_{x}$ for all $x \in \intP$.
+The importance of these properties is highlighted in the discussion that follows in the next subsection.
+\begin{lemma}
+	\label{lemma:first_bounds}
+	For any $x \in \intP$, the following properties hold:
+	\begin{enumerate}[label=(\alph*)]
+		\item \label{item:sigma_bound} $\lev_{x, i} \in [0, 1]$ for all $i \in [\obs]$,
+		% \item \label{item:g_bound} $g_{x, i} \in \brackets{\phiW, 1+\phiW}, i \in, [\obs]$;
+		\item \label{item:theta_bound} $\thetaW_{x, i} \in \brackets{0, \sqrt{\obs/\dims}}$ for all $i \in [\obs]$, and
+		% \item \label{item:theta_g_bound} $\thetaW_{x, i}g_{x, i} \in [0, 4\lev_{x, i}], i \in [\obs]$;
+		\item \label{item:sigma_sum} $\sum_{i=1}^\obs\lev_{x, i}  = \dims$.
+	\end{enumerate}
+\end{lemma}
+The proof of this lemma is provided in Section~\ref{ssub:proof_of_lemma_lemma:first_bounds}.
+Next, we state a lemma that shows that if two points $x, y \in \intP$ are close in local norm, then the one-step transition probability distributions $\transition_x$ and $\transition_y$ of the random walk \VW{r} for suitable choice of the radius $r$, are also close in TV-distance.
+\begin{lemma}
+	\label{lemma:vaidya_walk_close_kernel}
+	\begin{subequations}
+	There exists a continuous non-decreasing function $f: [0, 1/12] \rightarrow \real_+$ with $f(1/12) \geq 1/9000$, such that
+	for any $\epsilon \in (0, 1/4]$, the random walk \VW{r} with $r \in [0, f(\epsilon)]$ satisfies
+	% the following is true.
+	% Fix $\epsilon \in (0, 1/4]$ and choose the parameter $r$ for Vaidya walk smaller than $f(\epsilon)$.
+	% Then
+	\begin{align}
+		\vecnorm{\proposal_x-\proposal_y}{\text{TV}} &\leq \epsilon, \quad \mbox{$\forall x, y \in \intP$ such that $\vecnorm{x-y}{x} \leq \displaystyle\frac{\epsilon r}{2(\obs\dims)^{1/4}}$ }
+		,\quad \text{and}
+		\label{eq:delta_p}\\
+		\vecnorm{\transition_x-\proposal_x}{\text{TV}} &\leq 5\epsilon, \, \,\, \forall x \in \intP.
+		\label{eq:delta_q_p}
+	\end{align}
+	\end{subequations}
+\end{lemma}
+We provide the proof of the lemma in Section~\ref{ssub:proof_of_lemma_lemma:vaidya_walk_close_kernel}.
+We now provide an outline of the proof of Theorem~\ref{thm:mixing_time_bound} with some remarks that contrast Vaidya and Dikin walks.
+% subsection some_auxiliary_results (end)
+
+
+\subsection{Vaidya walk vs Dikin walk} % (fold)
+\label{sub:vaidya_vs_dikin}
+With the help of Lemma~\ref{lemma:Lovasz_theorem}, our proof of Theorem~\ref{thm:mixing_time_bound} proceeds by answering the following three questions:
+\begin{enumerate}[label=(\alph*)]
+	\item How does the local norm for the random walk relate to the cross-ratio?
+	\item How small does the distance $\vecnorm{x-y}{x}$ need to be for the proposal distributions $\proposal_x$ and $\proposal_y$ to be close?
+	\item What should be the value of $r$ such that for any $x \in \intP$, the Metropolis accept-reject step does not reject the proposal made by $\proposal_x$ with high probability?
+\end{enumerate}
+The first question is dealt directly in the proof of Theorem~\ref{thm:mixing_time_bound} while the other two questions are dealt by Lemma~\ref{lemma:vaidya_walk_close_kernel}.
+We now provide a high-level discussion of these questions with remarks that contrast Vaidya walk with Dikin walk.
+We contrast the two walks in terms of their \emph{respective} local-norms which are defined with respect to the matrix $\vaidyaW_x$ \eqref{eq:def_local_norm} for the Vaidya walk and with respect to the matrix $\hesslogbarr_x$ for the Dikin walk.
+
+\paragraph{Part~(a):} % (fold)
+\label{par:part_a}
+While the cross-ratio is bounded below by a factor of $1/\sqrt{\dims}$ (see bound~\eqref{eq:hilbert_to_local}) to the local-norm for Vaidya walk, the same factor is $1/\sqrt{\obs}$ for Dikin walk (see, e.g., Lemma~9 in the paper~\cite{sachdeva2016mixing}).
+Since the mixing time is affected inversely by this factor, we see that Vaidya walk has an \order{\sqrt{\obs/\dims}} advantage over Dikin walk for this part.
+% paragraph part_a (end)
+
+\paragraph{Part~(b):} % (fold)
+\label{par:part_b}
+To have a fast mixing chain, the distributions $\proposal_x$ and $\proposal_y$ need to be similar even when the points $x$ and $y$ are quite far apart.
+If we apply Pinsker's inequality, it suffices to show that the covariance $\vaidyaW_y \vaidyaW_x^{-1} \approx \Ind_\dims$, when $x$ and $y$ are close in local-norm.
+As we elaborate later, it suffices to control the eigenvalues of the matrix $\vaidyaW_y \vaidyaW_x^{-1}$ as a function of the local-norm of $x-y$.
+We show that the local-norm associated with Vaidya walk is \emph{weaker} than the local-norm associated with Dikin walk, i.e., a small perturbation in local-norm changes the covariance matrix much more for Vaidya walk compared to Dikin walk.
+As a result, $x$ and $y$ need to be much closer in local-norm for Vaidya walk (\order{1/(\obs\dims)^{1/4}}), compared to Dikin walk (\order{1/\sqrt{\dims}}) for $\proposal_x$ and $\proposal_y$ to be close.
+Thus, on this front Vaidya walk is worse by a factor of \order{(\obs/\dims)^{1/4}} to Dikin walk.
+% paragraph part_b (end)
+
+\paragraph{Part~(c):} % (fold)
+\label{par:part_c}
+Note that the scale parameter in the proposal step of the walk \VW{r} is ${r}/{\parenth{\obs\dims}^{1/4}}$ and for Dikin walk the scale parameter is ${r'}/{\sqrt{\dims}}$, where $r$ and $r'$ are universal constants.
+As a result, the scaling factor for Vaidya walk is worse by \order{(\obs/\dims)^{1/4}} to Dikin walk.
+We now elaborate the reason for such a scaling at a high level.
+The scaling factor is chosen such that the proposals are accepted with at least a constant probability for any $x \in \intP$.
+In order to ensure this ``good proposal property'', we have to show that for the given scalings the proposal $z \sim \proposal_x$ satisfies the following two properties with high probability---$(i)$ the proposal $z$ remains inside $\Pspace$, and $(ii)$ the ratio $\density_z(x)/\density_x(z)$ is bounded away from zero.
+It is easy to show part~$(i)$ using concentration of $\dims$-dimensional standard Gaussian vector on the unit sphere in $\realdim$, and the bound on the slack sensitivity $\theta_x$.
+However, proving part~$(ii)$ needs some work that we summarize now.
+To control the ratio $\density_z(x)/\density_x(z)$, we need to carefully bound the difference in the volume of unit-ellipsoids defined by $V_z$ and $V_x$, and the difference in local-norms at $z$ and $x$ scaled by $\sqrt{\obs\dims}$.
+It turns out that controlling the eigenvalues of the matrix $\vaidyaW_z \vaidyaW_x^{-1}$ leads to a non-useful bound and hence we make use of Taylor expansion.
+For both the parts $(i)$ and $(ii)$, it turns out that if the slack sensitivity $\theta_{x}$ is smaller, we can use a larger scaling factor.
+Since the local sensitivity induced by Vaidya walk is larger than Dikin walk, we need to use a scaling of ${r/\parenth{\obs\dims}^{1/4}}$ for the former compared to $r'/\sqrt{\dims}$ for the later.
+% paragraph part_c (end)
+
+\paragraph{Who wins the race?} % (fold)
+\label{par:who_wins_the_race_}
+Putting the three parts together, we see that we gain a factor of \order{\sqrt{\obs/\dims}} in part(a) and lose a factor of \order{(\obs/\dims)^{1/4}} both in part~(b) and part~(c).
+We prove later that the order of the ratio of mixing times of the two random walks is affected quadratically with respect to the gain from part~(a) times maximum of loss from parts~(b) and (c).
+Thus we see an overall gain of \order{\sqrt{\obs/\dims}} in mixing time for Vaidya walk over Dikin walk.
+% paragraph who_wins_the_race_ (end)
+
+We are now ready to provide a formal proof of Theorem~\ref{thm:mixing_time_bound}.
+% subsection discussion (end)
+
+\subsection{Proof of Theorem~\ref{thm:mixing_time_bound}} % (fold)
+\label{sub:proof_of_theorem_thm:mixing_time_bound}
+
+We prove Theorem~\ref{thm:mixing_time_bound} using Lemmas~\ref{lemma:Lovasz_theorem}, \ref{lemma:first_bounds} and \ref{lemma:vaidya_walk_close_kernel}.
+To invoke Lemma~\ref{lemma:Lovasz_theorem} for \VW{1/9000}, we need to show that for any two points $x, y \in \intP$ such that $d_\Pspace(x, y)$ is small, we have that $\vecnorm{\transition_x-\transition_y}{\text{TV}}$ is small.
+Along the outline discussed in previous subsection, we break our analysis in two steps---(A) We first relate the cross-ratio $d_\Pspace(x, y)$ to the local norm \eqref{eq:def_local_norm} at $x$, and (B) then  use Lemma~\ref{lemma:vaidya_walk_close_kernel} to show that if $x, y \in \intP$ are close in local-norm, then the transition kernels $\transition_x$ and $\transition_y$ are close in TV-distance.
+
+\paragraph{Step~(A):} % (fold)
+\label{par:step_a}
+We claim that for all $x, y \in \intP$, the cross-ratio can be lower bounded as
+\begin{align}
+	d_\Pspace(x, y) \geq \frac{1}{\sqrt{2\dims}} \vecnorm{x-y}{x}.
+	\label{eq:hilbert_to_local}
+\end{align}
+Note that we have
+\begin{align*}
+	d_\Pspace(x, y) = \frac{ \vecnorm{e(x)-e(y)}{2} \vecnorm{x-y}{2} }{ \vecnorm{e(x)-x}{2} \vecnorm{e(y)-y}{2} }
+	&\stackrel{(i)}{\geq} \max \braces{  \frac{\vecnorm{x-y}{2} }{\vecnorm{e(x)-x}{2}}, \frac{\vecnorm{x-y}{2} }{\vecnorm{e(y)-y}{2}}}\\
+	&\stackrel{(ii)}{\geq} \max \braces{  \frac{\vecnorm{x-y}{2} }{\vecnorm{e(x)-x}{2}}, \frac{\vecnorm{x-y}{2} }{\vecnorm{e(y)-x}{2}}}
+\end{align*}
+where step $(i)$ follows from the inequality $ \vecnorm{e(x)-e(y)}{2} \geq \max\braces{\vecnorm{e(y)-y}{2}, \vecnorm{e(x)-x}{2}}$ and step $(ii)$ from the inequality $ \vecnorm{e(x)-x}{2} \leq {\vecnorm{e(y)-x}{2}}$.
+Furthermore, from Figure~\ref{fig:cross_ratio}, we observe that
+\begin{align}
+	\max \braces{  \frac{\vecnorm{x-y}{2} }{\vecnorm{e(x)-x}{2}}, \frac{\vecnorm{x-y}{2} }{\vecnorm{e(y)-x}{2}}}
+	= \max_{i \in [\obs]} \left\vert\frac{a_i^\top (x - y)}{\slack_{x, i}} \right\vert.
+	\label{eq:relate_cross_ratio}
+\end{align}
+Note that maximum of a set of non-negative numbers is greater than the mean of the numbers.
+Combining this fact with properties \ref{item:sigma_bound} and \ref{item:sigma_sum} from  Lemma~\ref{lemma:first_bounds},
+\begin{align*}
+	d_\Pspace(x, y) \geq \sqrt{ \frac{1}{\sum_{i=1}^\obs \parenth{\lev_{x, i}+ \offset}} \sum_{i=1}^\obs (\lev_{x, i}+ \offset) \frac{(a_i^\top(x-y))^2} {\slack_{x, i}^2} }  = \frac{\vecnorm{x-y}{x}}{\sqrt{2\dims}},
+\end{align*}
+thereby proving the claim~\eqref{eq:hilbert_to_local}.
+% paragraph step_ A(end)
+
+\paragraph{Step~(B):} % (fold)
+\label{par:step_b}
+By the triangle inequality, we have
+\begin{align*}
+	\vecnorm{\transition_x - \transition_y}{\text{TV}} \leq \vecnorm{\transition_x-\proposal_x}{\text{TV}} + \vecnorm{\proposal_x-\proposal_y}{\text{TV}} + \vecnorm{\proposal_y - \transition_y}{\text{TV}}.
+\end{align*}
+Thus, for any $(r, \epsilon)$ such that $\epsilon \in [0, 1/4]$ and $r \leq f(\epsilon)$, Lemma~\ref{lemma:vaidya_walk_close_kernel} implies that
+\begin{align*}
+	\vecnorm{\transition_x - \transition_y}{\text{TV}} \leq 11 \epsilon, \quad \mbox{$\forall x, y \in \intP$ such that $ \vecnorm{x-y}{x} \leq \displaystyle\frac{r\epsilon}{2 (\obs\dims)^{1/4}}$}.
+\end{align*}
+\\
+
+\noindent Consequently, the walk \VW{r} satisfies the assumptions of Lemma~\ref{lemma:Lovasz_theorem} with
+\begin{align*}
+	\Delta \defn \frac{1}{\sqrt{2\dims}} \cdot \frac{r\epsilon} {2(\obs\dims)^{1/4}} \quad \text{ and }\quad \rho \defn 1-11\epsilon.
+\end{align*}
+Since $f(1/12) \geq 1/9000$, we can set $\epsilon = 1/12$ and $r = {1}/{9000}$, whence
+\begin{align*}
+	\Delta^2\rho^2 = \frac{(1-11\epsilon)^2\epsilon^2r^2}{8\dims\sqrt{\obs\dims}} = \frac{1}{12^4} \frac{1}{9000^2} \cdot\frac{1}{\dims\sqrt{\obs\dims}} \geq \frac{1}{2} \cdot 10^{-12} \, \frac{1}{\dims\sqrt{\obs\dims}}.
+\end{align*}
+Observing that $\Delta <1$ yields the claimed upper bound for the mixing time of Vaidya Walk.
+% subsection proof_of_theorem_thm:mixing_time_bound (end)
+
+
+
+% subsection proof_of_theorem_thm:central_start (end)
+
+\subsection{Proof of Lemma~\ref{lemma:Lovasz_theorem}} % (fold)
+\label{sub:proof_of_lemma_lemma:lovasz_theorem}
+We begin by formally defining the conductance ($\conductance$) of a Markov chain on $(\Pspace, \mathbb{B}(\Pspace))$ with arbitrary transition kernel $\transition_x$ and stationary distribution $\stationary$
+\begin{align*}
+	\conductance
+	\defn \inf_{\substack{\set \in \mathbb{B}(\Pspace)\\ \stationary(\set) \in (0, 1/2)}} \frac{\conductance(\set)}{\stationary(\set)}
+	\quad \text{where} \quad
+	\conductance(\set) \defn \int_\set \transition_u(\Pspace \cap \set^c) d\stationary(u)
+	\quad \text{ for any } \set \subseteq \Pspace.
+\end{align*}
+The conductance denotes the measure of the flow from a set to its complement relative to its own measure, when initialized in the stationary distribution.
+If the conductance is high, the following celebrated result shows that the Markov chain mixes fast.
+\begin{lemma}
+	\label{lemma:conductance_mixing}
+	For any $M$-warm start $\initial$, the mixing time of the Markov chain with conductance~$\conductance$ is bounded as
+	\begin{align*}
+		\vecnorm{\initial\transition^k-\stationary}{\text{TV}} \leq \sqrt{M} \parenth{1-\frac{\conductance^2}{2}}^k \leq \sqrt{M} \exp\parenth{-k\frac{\conductance^2}{2} }.
+	\end{align*}
+\end{lemma}
+Note that this result holds for a general distribution $\stationary$ although we apply  for uniform $\stationary$.
+The result can be derived from Cheeger's inequality for continuous-space discrete-time Markov chain and elementary results in Calculus.
+See, e.g., Theorem~1.4 and Corollary~1.5 in the paper~\cite{lovasz1993random} for a proof.
+For ease in notation define $\Pspace \backslash \set \defn \Pspace \cap \set^c$.
+We now state a key isoperimetric inequality.
+\begin{lemma}[Theorem~6~\cite{lovasz1999hit}]
+	\label{lemma:isoperimetry}
+	For any measurable sets $\set_1, \set_2 \subseteq \Pspace$, we have
+	\begin{align*}
+		\vol(\Pspace \backslash \set_1  \backslash \set_2) \cdot  \vol(\Pspace)
+		\geq d_\Pspace(\set_1, \set_2) \cdot \min\braces{\vol(\set_1), \vol(\set_2)},
+	\end{align*}
+	where $d_\Pspace(\set_1, \set_2) \defn \inf_{x \in \set_1, y \in \set_2} d_\Pspace(x, y)$.
+\end{lemma}
+(There is a typo on the RHS in the statement of the theorem in the paper.)
+Since $\stationary$ is the uniform measure on $\Pspace$, this lemma implies that
+\begin{align}
+	\stationary(\Pspace \backslash \set_1  \backslash \set_2) \geq d_\Pspace(\set_1, \set_2) \min\braces{\stationary(\set_1), \stationary(\set_2)}.
+	\label{eq:isoperimetry}
+\end{align}
+In fact, such an inequality holds for an arbitrary log-concave distribution~\cite{lovasz2003hit}.
+In words, the inequality says that for a bounded convex set any two subsets which are far apart, can not have a large volume.
+Taking these lemmas as given, we now complete the proof.
+
+\begin{proof}[Proof of Lemma~\ref{lemma:Lovasz_theorem}]
+	We first bound the conductance of the Markov chain using the assumptions of the lemma.
+From Lemma~\ref{lemma:conductance_mixing}, we see that the Markov chain mixes fast if all the sets $\set$ have a high conductance $\conductance(\set)$.
+We claim that
+\begin{align}
+	\label{eq:condutance_bound}
+	\conductance \geq \frac{\rho \Delta}{16},
+\end{align}
+from which the proof follows by applying Lemma~\ref{lemma:conductance_mixing}.
+We now prove the claim~\eqref{eq:condutance_bound} along the lines of Theorem~11 in the paper~\cite{lovasz1999hit}.
+In particular, we show that under the assumptions in the lemma, the sets with bad conductance are far apart and thereby have a small measure under $\stationary$, whence the ratio $\conductance(\set)/\stationary(\set)$ is not arbitrarily small.
+Consider a partition $\set_1, \set_2$ of the set $\Pspace$ such that $\set_1$ and $\set_2$ are measurable.
+Since $\stationary$ is the uniform measure, it suffices to show that
+\begin{align*}
+	\int_{\set_1} \lazytrans_u(\set_2) du \geq  \frac{\rho \Delta}{16} \cdot \min\braces{\vol(\set_1), \vol(\set_2)}.
+\end{align*}
+Consider the sets
+\begin{align}
+	\set_1' &\defn \braces{ u \in \set_1 \bigg\vert \nolazytrans_u(\set_2) < \frac{\rho}{2} },\quad
+	\set_2' &\defn  \braces{ v \in \set_2 \bigg\vert \nolazytrans_v(\set_1) < \frac{\rho}{2} }, \quad \text{and}\quad
+	\set_3' &\defn \Pspace \backslash \set_1' \backslash \set_2'.
+	\label{eq:define_three_sets}
+\end{align}
+If we have $\vol(\set_1') \leq \vol(\set_1)/2$ and consequently $\vol(\Pspace \backslash \set_1') \geq \vol(\set_1)/2$, then
+\begin{align*}
+	\int_{\set_1} \lazytrans_u(\set_2) du
+	\stackrel{(i)}{\geq} \frac{1}{2} \int_{\Pspace \backslash \set_1'} \nolazytrans_u(\set_2) du
+	\stackrel{(ii)}{\geq} \frac{\rho}{4}  \vol(\set_1)
+	\stackrel{(iii)}{\geq} \frac{\rho\Delta}{16} \cdot \min\braces{\vol(\set_1), \vol(\set_2)},
+\end{align*}
+and we are done.
+In the above sequence of inequalities, step $(i)$ follows from the definition of the kernel $\lazytrans$, step $(ii) $ follows from the definition of the set $\set_1'$~\eqref{eq:define_three_sets} and step $(iii)$ from the fact that $\Delta < 1 $.
+
+Hence, without loss of generality we can assume $\vol(\set_i') \geq \vol(\set_i)/2$ for each $i\in \braces{1, 2}$.
+Now for any $u \in \set_1'$ and $v \in \set_2'$ we have
+\begin{align*}
+	\vecnorm{\nolazytrans_u- \nolazytrans_v}{\text{TV}}
+	\geq \nolazytrans_u(\set_1) - \nolazytrans_v(\set_1)
+	= 1 -  \nolazytrans_u(\set_2) - \nolazytrans_v(\set_1)
+	> 1 - \rho,
+\end{align*}
+and hence by assumption we have $d_\Pspace(\set_1', \set_2') \geq \Delta$.
+Applying Lemma~\ref{lemma:isoperimetry} and the definition of $\set_3'$~\eqref{eq:define_three_sets} we find that
+\begin{align}
+	\vol(\set_3') \geq \Delta \min\braces{\vol(\set_1'), \vol(\set_2')}
+	\geq \frac{\Delta}{2} \min\braces{\vol(\set_1), \vol(\set_2)}.
+	\label{eq:iso_s3}
+\end{align}
+We now show that
+\begin{align}
+	\int_{\set_1} \lazytrans_u(\set_2)du = \int_{\set_2} \lazytrans_v(\set_1)dv.
+	\label{eq:equality_of_T1_T2}
+\end{align}
+Noting that $\set_1 = \Pspace\backslash \set_2$, we have
+\begin{align*}
+	\frac{1}{\vol(\Pspace)} \int_{\set_1} \lazytrans_u(\set_2) du
+	= \int_{\set_1} \lazytrans_u(\set_2) \stationarydensity(u) du
+	= \conductance(\set_1)
+	\stackrel{(i)}{=} \conductance(\Pspace\backslash \set_1)
+	% &= \int_{\set_2} \nolazytrans_v(\set_1) \stationarydensity(v) dv\\
+	= \frac{1}{\vol(\Pspace)} \int_{\set_2} \lazytrans_v(\set_1) dv,
+\end{align*}
+where in step $(i)$ we have used the following claim: For any measurable $\set \subseteq \Pspace$, we have
+\begin{align}
+	\conductance(\set) = \conductance(\Pspace\backslash \set).
+	\label{eq:equality_of_conductance}
+\end{align}
+We now prove the claim~\eqref{eq:equality_of_conductance}.
+Noting that $\int_{\Pspace} \lazytrans_u(\set) d\stationary(u) = \stationary(\set)$, we have
+\begin{align*}
+	\conductance(\Pspace\backslash \set)
+	= \int_{\Pspace\backslash \set} \lazytrans_u(\set) d\stationary(u)
+	= \int_{\Pspace} \lazytrans_u(\set) d\stationary(u) - \int_{\set} \lazytrans_u(\set) d\stationary(u)
+	&= \stationary(\set) - \int_{\set} \lazytrans_u(\set) d\stationary(u).
+\end{align*}
+Using the fact that $1-\lazytrans_u(\set) = \lazytrans_u(\Pspace\backslash\set)$, we obtain
+\begin{align*}
+	\stationary(\set) - \int_{\set} \lazytrans_u(\set) d\stationary(u)
+	= \int_{\set} d\stationary(u)  - \int_{\set} \lazytrans_u(\set) d\stationary(u)
+	= \int_{\set}\lazytrans_u(\Pspace\backslash\set) d\stationary(u)
+	= \conductance(\set),
+\end{align*}
+thereby yielding the claim.
+
+Using the equation~\eqref{eq:equality_of_T1_T2}, we find that
+\begin{align*}
+	\int_{\set_1} \lazytrans_u(\set_2)	du
+	= \frac{1}{2}\parenth{ \int_{\set_1} \lazytrans_u(\set_2) du + \int_{\set_2} \lazytrans_v(\set_1)dv }
+	&\stackrel{(i)}{\geq} \frac{1}{2}\parenth{ \frac{1}{2} \int_{\Pspace \backslash \set_1'} \nolazytrans_u(\set_2) du
+							 	+ \frac{1}{2} \int_{\Pspace \backslash \set_2'} \nolazytrans_v(\set_2) dv  }\\
+	&\stackrel{(ii)}{\geq} \frac{\rho}{8} \vol(\set_3')\\
+	&\stackrel{(iii)}{\geq} \frac{\rho\Delta}{16}  \min\braces{\vol(\set_1), \vol(\set_2)},
+\end{align*}
+where step $(i)$ follows from the definition of the kernel $\lazytrans$, step $(ii)$ follows from the definition of the set $\set_3'$~\eqref{eq:define_three_sets} and step $(iii)$ follows from the inequality~\eqref{eq:iso_s3}.
+Putting together the pieces yields the claim~\eqref{eq:condutance_bound}.
+\end{proof}
+
+% subsection proof_of_lemma_lemma:lovasz_theorem (end)
+
+
+\subsection{Proof of Lemma~\ref{lemma:first_bounds}} % (fold)
+\label{ssub:proof_of_lemma_lemma:first_bounds}
+
+To prove part~\ref{item:sigma_bound} observe that the Hessian $\hesslogbarr_x = \sum_{i=1}^\obs a_ia_i^\top/\slack_{x, i}^2$ is a sum of rank one positive semidefinite (PSD) matrices.
+Also, we can write $\hesslogbarr_x = A_x\tp A_x$ where
+\begin{align*}
+	A_x \defn
+	\begin{bmatrix}
+		{a_1\tp}/{\slack_{x, 1}}\\
+		\vdots\\
+		{a_\obs\tp}/{\slack_{x, \obs}}
+	\end{bmatrix} \quad \mbox{for all $x \in \intP$}.
+\end{align*}
+Since $\rank(A_x) = \dims$, we conclude that the matrix $\hesslogbarr_x$ is invertible and thus, both the matrices $\hesslogbarr_x$ and $\parenth{\hesslogbarr_x}^{-1}$ are PSD.
+Since $\lev_{x, i} = a_i^\top \parenth{\hesslogbarr_x}^{-1} a_i / \slack_{x, i}^2$, we have $\lev_{x, i} \geq 0$.
+Further, the fact that ${a_i a_i^\top}/{\slack_{x, i}^2} \preceq \hesslogbarr_x $ implies that   $\lev_{x, i} \leq 1$.
+
+For part~\ref{item:sigma_sum}, using the equality $\trace(AB) = \trace(BA)$, we obtain
+\begin{align*}
+	\sum_{i=1}^\obs  \lev_{x, i}
+	= \trace \parenth{\sum_{i=1}^\obs  \frac{a_i^\top \parenth{\hesslogbarr_x}^{-1} a_i}{\slack_{x, i}^2}}
+	= \trace \parenth{\parenth{\hesslogbarr_x}^{-1}  \sum_{i=1}^\obs  \frac{a_i a_i^\top}{\slack_{x, i}^2}}
+	= \trace (\Ind_\dims)
+	= \dims.
+\end{align*}
+
+Now we prove part~\ref{item:theta_bound}.
+Using the fact that $\lev_{x, i}\geq 0$, and an argument similar to part~\ref{item:sigma_bound} we find that that the matrices $\vaidyaW_x$ and $\vaidyaW_x^{-1}$ are PSD.
+Since $\thetaW_{x, i} = {a_i^\top \vaidyaW_x^{-1} a_i}/{\slack_{x, i}^2}$, we have $\thetaW_{x,i}\geq 0$.
+It is straightforward to see that $\offset\hesslogbarr_x \preceq \vaidyaW_x$ which implies that $\thetaW_{x, i} \leq \lev_{x, i}/\beta$.
+Further, we also have $\parenth{\lev_{x, i}+ \offset}\frac{a_i a_i^\top}{\slack_{x, i}^2} \preceq \vaidyaW_x$ and whence $ \thetaW_{x, i} \leq 1/\parenth{\lev_{x, i}+ \offset} $.
+Combining the two inequalities yields the claim.
+
+% subsection proof_of_lemma_ppt:sigma_and_theta_bounds (end)
+
+
+\subsection{Proof of Lemma~\ref{lemma:vaidya_walk_close_kernel}} % (fold)
+\label{ssub:proof_of_lemma_lemma:vaidya_walk_close_kernel}
+
+We prove the lemma for the following function
+\begin{subequations}
+\begin{align}
+	f(\epsilon) \defn 
+	\min\braces{
+	\frac{1}{40\sqrt{\log\parenth{4/\epsilon}}},
+	\frac{\sqrt{\epsilon}}{30\sqrt{\log\parenth{4/\epsilon}}},
+	\frac{\epsilon}{84 \cdot \parenth{\log(4/\epsilon)}^{\frac{3}{2}}}, 
+	\frac{\sqrt{\epsilon}}{100 \cdot {\log(4/\epsilon)}} 
+	}. 
+	\label{eq:r_2_epsilon}
+\end{align}
+% \begin{align}
+% 	r_1(\epsilon) &\defn \min \braces{\frac{1}{20 \sqrt{1+\sqrt{2}\log\parenth{4/\epsilon}}}, \frac{\epsilon}{\sqrt{72 \log\parenth{2/\epsilon}}}, \sqrt{\frac{\epsilon}{200\sqrt{3} e \log\parenth{4/\epsilon}}}},\quad\text{and} \label{eq:r_1_epsilon}\\
+% 	r_2(\epsilon) &\defn \min\braces{\frac{1}{20\sqrt{1 + \sqrt{2} \log\parenth{4/\epsilon}}}, \frac{\epsilon}{7\sqrt{15}\parenth{2e/3 \cdot \log(4/\epsilon)}^{\frac{3}{2}}}, \sqrt{\frac{\epsilon}{100\sqrt{105}\parenth{e \log(4/\epsilon)}^2}}}. \label{eq:r_2_epsilon}
+% \end{align}
+\end{subequations}
+Some straightforward algebra shows that $f(1/12) \geq 1/9000$.
+
+
+\subsubsection{Proof of claim~\eqref{eq:delta_p}} % (fold)
+\label{sssub:proof_of_claim_eq:delta_p}
+In order to bound the total variation distance $\vecnorm{\proposal_x-\proposal_y}{\text{TV}}$, we apply Pinsker's inequality, which provides an upper bound on the TV-distance in terms of the KL Divergence:
+\begin{align*}
+	\vecnorm{\proposal_x-\proposal_y}{\text{TV}} \leq \sqrt{2\text{KL}(\proposal_x \Vert \proposal_y)}.
+\end{align*}
+For Gaussian distributions, the KL Divergence has a closed form expression.
+In particular, for two normal-distributions $\mathcal{G}_1 = \NORMAL\parenth{\mu_1, \levmatrix_1}$ and $\mathcal{G}_2 = \NORMAL\parenth{\mu_2, \levmatrix_2}$, the Kullback-Leibler divergence between the two is given by
+    \begin{align*}
+        \text{KL}(\mathcal{G}_1\Vert \mathcal{G}_2) = \frac{1}{2} \Big({
+        \trace\parenth{\levmatrix_1^{-1}\levmatrix_2}
+        -\dims
+        +\log \det \parenth{\levmatrix_1\levmatrix_2^{-1}}
+        + \parenth{\mu_1-\mu_2}^\top \levmatrix_1^{-1}\parenth{\mu_1-\mu_2}
+        }\Big).
+    \end{align*}
+Substituting $\mathcal{G}_1 = \proposal_x$ and $\mathcal{G}_2 = \proposal_y$ into the above expression and applying Pinsker's inequality, we find that
+\begin{align}
+	\vecnorm{\proposal_x-\proposal_y}{\text{TV}}^2 \leq 2 \text{KL}( \proposal_y \Vert \proposal_x )
+	&=  \trace(\vaidyaW_y\vaidyaW_x^{-1}) - \dims + \log\parenth{\frac{\det \vaidyaW_x}{\det \vaidyaW_y}} + \frac{\sqrt{\obs \dims}}{r^2} \vecnorm{x-y}{x} \notag \\
+	&= \sum_{i=1}^\dims \parenth{\lambda_i - 1 + \log\frac{1}{\lambda_i}} + \frac{\sqrt{\obs \dims}}{r^2} \vecnorm{x-y}{x},
+	\label{eq:final_KL_expression}
+\end{align}
+where $\lambda_1, \ldots, \lambda_\dims >0$ denote the eigenvalues of $\vaidyaW_y \vaidyaW_x^{-1}$
+and we have used the facts that $\det\parenth{\vaidyaW_y \vaidyaW_x^{-1}} = \prod_{i=1}^\dims \lambda_i$ and $\trace\parenth{\vaidyaW_y \vaidyaW_x^{-1}} = \sum_{i=1}^\dims \lambda_i$.
+The following lemma is useful to bound the expression~\eqref{eq:final_KL_expression}.
+\begin{lemma}
+    \label{lemma:close_hessian_eigenvalues}
+    For any scalar $t \in [0, \sqrt{\dims}/12]$ and any pair $x, y \in \intP$ such that \mbox{$\vecnorm{x-y}{x} \leq t / (\obs\dims)^{1/4}$} we have
+    \begin{align*}
+    	\parenth{1 - \frac{6 t}{\sqrt{\dims}} + \frac{ t^2}{\dims}}\vaidyaW_x \leq \vaidyaW_y \leq \parenth{1 + \frac{6 t}{\sqrt{\dims}} + \frac{t^2}{\dims}}\vaidyaW_x.
+    \end{align*}
+\end{lemma}
+See Appendix~\ref{sub:proof_of_lemma_lemma:close_hessian_eigenvalues} for its proof.
+For $\epsilon \in (0, 1/4]$ and $r = 1/9000$, we have $t = \epsilon r /2 \leq 1/12$, whence the eigenvalues $\{\lambda_i, i \in [\dims]\}$  can be sandwiched as
+\begin{align}
+	1 - \frac{3 \epsilon r}{\sqrt{\dims}} + \frac{\epsilon^2r^2}{4\dims}
+	\leq \lambda_i
+	\leq 1 + \frac{3 \epsilon r}{\sqrt{\dims}} + \frac{\epsilon^2r^2}{4\dims} \quad \mbox{for all $i \in \dims$}.
+\label{eq:lambda_bounds}
+\end{align}
+We are now ready to bound the TV distance between $\proposal_x$ and $\proposal_y$.
+Using the bound~\eqref{eq:final_KL_expression} and the inequality $\log \gamma \leq \gamma - 1$ , valid for $ \gamma>0$, we obtain
+\begin{align*}
+	\vecnorm{\proposal_x-\proposal_y}{\text{TV}}^2
+	\leq \sum_{i=1}^\dims \parenth{\lambda_i - 2 + \frac{1}{\lambda_i}} + \frac{\sqrt{\obs \dims}}{r^2} \vecnorm{x-y}{x}.
+\end{align*}
+Using the assumption that $\vecnorm{x-y}{x}\leq {\epsilon r}/\parenth{2(\obs\dims)^{1/4}}$, and plugging in the bounds~\eqref{eq:lambda_bounds} for the eigenvalues $\{\lambda_i, i \in [\dims]\}$, we find that
+\begin{align*}
+	\sum_{i=1}^\dims \parenth{\lambda_i - 2 + \frac{1}{\lambda_i}} + \frac{\sqrt{\obs \dims}}{r^2} \vecnorm{x-y}{x}
+	\leq \frac{141 \epsilon^2 r^2}{4\dims} + \frac{\epsilon^2}{4}.
+\end{align*}
+In asserting this inequality, we have used the facts that
+\begin{align*}
+	\frac{1}{1 - 6\gamma + \gamma^2} \leq 1 + 6 \gamma + 70 \gamma^2,
+	\quad \text{and}\quad
+	\frac{1}{1 + 6\gamma + \gamma^2} \leq 1 - 6\gamma + 70 \gamma^2
+	\quad \mbox{for all $\gamma \in \brackets{0, \frac{1}{12}}$}.
+\end{align*}
+Note that for any  $r \in [0, 1/12]$ we have that $141 r^2/(4\dims) \leq 1/2$.
+Putting the pieces together yields $\vecnorm{\proposal_x-\proposal_y}{\text{TV}} \leq \epsilon$, as claimed.
+
+%%%%%%%%%      ANOTHER WAY TO WRITE THE PREVIOUS PARA    %%%%%%%%%%
+% We are now ready to bound the TV distance between $\proposal_x$ and $\proposal_y$:
+% \begin{align*}
+% 	\vecnorm{\proposal_x-\proposal_y}{\text{TV}}^2
+% 	&\stackrel{(i)}{\leq} \sum_{i=1}^\dims \parenth{\lambda_i - 2 + \frac{1}{\lambda_i}} + \frac{\sqrt{\obs \dims}}{r^2} \vecnorm{x-y}{x}
+% 	\stackrel{(ii)}{\leq} \frac{71 \epsilon^2 r^2}{4\dims} + \frac{\epsilon^2}{4}
+% 	\stackrel{(iii)}{\leq} \epsilon^2,
+% \end{align*}
+% where step $(i)$ follows from the inequality $\log \gamma \leq \gamma - 1$ for $ \gamma>0$.
+% For step $(ii)$, we have used the  and the following observations: (a) The map $\gamma \mapsto \gamma + \frac{1}{\gamma}-2$ is convex for $\gamma > 0$,
+% and (b) for $0 \leq \gamma \leq \frac{1}{12}$ we have
+% \begin{align*}
+% 	\frac{1}{1 - 6\gamma + \gamma^2} \leq 1 + 6 \gamma + 70 \gamma^2,
+% 	\quad \text{and}\quad
+% 	\frac{1}{1 + 6\gamma + \gamma^2} \leq 1 - 6\gamma + 70 \gamma^2.
+% \end{align*}
+% Finally, in step $(iii)$ we have used the fact that for any  $r \in [0, 1/6]$ we have that $71 r^2/(4\dims) \leq 1/2$.
+% Thus we obtain $\vecnorm{\proposal_x-\proposal_y}{\text{TV}} \leq \epsilon$, as claimed.
+%% subsubsection proof_of_claim_eq:delta_p (end)
+% paragraph proof_of_claim_eq:delta_p (end)
+
+\subsubsection{Proof of claim~\eqref{eq:delta_q_p}} % (fold)
+\label{ssub:proof_of_claim_eq:delta_q_p}
+Note that
+\begin{align}
+	\transition_x(\braces{x}) = \proposal_x(\Pspace^c) + 1-\int_\Pspace \min\braces{1, \frac{\density_z(x)}{\density_x(z)}} \density_x(z) dz,
+	\label{eq:remain_at_x}
+\end{align}
+where $\Pspace^c$ denotes the complement of $\Pspace$.
+Consequently, we obtain that
+\begin{align}
+	\vecnorm{\proposal_x - \transition_x}{\text{TV}}
+	&= \frac{1}{2} \parenth{\transition_x(\braces{x}) + \int_{\realdim} \density_x(z) dz - \int_{\Pspace} \min\braces{1, \frac{\density_z(x)}{\density_x(z)}} \density_x(z) dz} \notag\\
+	% &= \frac{1}{2} \parenth{\proposal_x(\Pspace^c) + 2 -  2 \int_{\Pspace} \min\braces{1, \frac{\density_z(x)}{\density_x(z)}} \density_x(z) dz}\\
+	&= \frac{1}{2} \parenth{\proposal_x(\Pspace^c) + 2 -  2 \int_{\realdim} \min\braces{1, \frac{\density_z(x)}{\density_x(z)}} \density_x(z) dz + 2 \int_{\Pspace^c} \min\braces{1, \frac{\density_z(x)}{\density_x(z)}} \density_x(z) dz }\notag\\
+	&\leq \underbrace{\frac{3}{2} \proposal_x(\Pspace^c)}_{T_1\defn} + \underbrace{1-\Exs_{z \sim \proposal_x} \brackets{\min\braces{1, \frac{\density_z(x)}{\density_x(z)}}}}_{T_2\defn},
+	\label{eq:bound_on_jumping_out}
+\end{align}
+Thus it suffices to show that both $T_1$ and $T_2$ are small, where the probability is taken over the randomness in the proposal $z$.
+In particular, we show that $T_1 \leq \epsilon$ and $T_2 \leq 4\epsilon$.
+\\
+
+\noindent \textbf{Bounding $T_1$:}
+Note that a random variable $z \sim \proposal_x$ can be written as
+\begin{align}
+    z \stackrel{d}{=} x + \frac{r}{(\obs\dims)^{1/4}} \vaidyaW_x^{-{1}/{2}} \rvg,
+    \label{eq:z_x_relation}
+\end{align}
+where  $\rvg \sim \NORMAL\parenth{0, \Ind_\dims}$ and $\stackrel{d}{=}$ denotes equality in distribution.
+Using equation~\eqref{eq:z_x_relation} and definition~\eqref{eq:theta_Definition} of $\thetaW_{x, i}$, we obtain that
+\begin{align}
+ \frac{\parenth{a_i^\top \parenth{z-x}}^2 }{\slack_{x, i}^2}
+ 	& = \frac{r^2}{\parenth{\obs \dims}^{\frac{1}{2}}} \brackets{\frac{a_i^\top \vaidyaW_x^{-{1}/{2}} \rvg }{\slack_{x, i}}}^2
+ 	\stackrel{(i)}{\leq} \frac{r^2}{\parenth{\obs \dims}^{\frac{1}{2}}} \thetaW_{x,i} \vecnorm{\rvg}{2}^2
+ 	\stackrel{(ii)}{\leq} \frac{r^2}{\dims} \vecnorm{\rvg}{2}^2,
+ \label{eq:bound_on_deviation}
+\end{align}
+where step $(i)$ follows from Cauchy-Schwarz inequality and step $(ii)$ from the bound on $\thetaW_{x, i}$ from Lemma~\ref{lemma:first_bounds}\ref{item:theta_bound}.
+% For random variables $g$ and $z$ distributed as $g \sim \NORMAL\parenth{0, \Ind_\dims}$ and $z \sim \proposal_x$,
+Define the events
+\begin{align*}
+	\mathcal{E} \defn \braces{\frac{r^2}{\dims} \vecnorm{\rvg}{2}^2 < 1}
+	\quad \text{and} \quad
+	\mathcal{E}'\defn \braces{z \in \intP}.
+\end{align*}
+Inequality~\eqref{eq:bound_on_deviation} implies that $\mathcal{E} \subseteq \mathcal{E}'$ and hence $\Prob\brackets{\mathcal{E}'} \geq \Prob\brackets{\mathcal{E}}$.
+Using a standard Gaussian tail bound and noting that $r \leq \frac{1}{1 + \sqrt{2/\dims \log (2/\epsilon)}}$, we obtain
+$ \Prob\brackets{\mathcal{E}} \geq 1-\epsilon/2$ and whence $ \Prob\brackets{\mathcal{E}'} \geq 1-\epsilon/2$.
+Thus, we have shown that $\Prob\brackets{z \notin \Pspace} \leq \epsilon/2$ which implies that $T_1 \leq \epsilon$.
+\\
+
+\noindent \textbf{Bounding $T_2$:}
+By Markov's inequality, we have
+\begin{align}
+	\Exs_{z \sim \proposal_x} \brackets{\min\braces{1, \frac{\density_z(x)}{\density_x(z)}}} \geq \alpha \Prob\brackets{\density_z(x) \geq \alpha \density_x(z)}
+	\quad \mbox{for all $\alpha \in [0, 1]$}. \label{eq:markov_inequality}
+\end{align}
+By definition~\eqref{eq:proposal_density} of $\density_x$, we obtain
+\begin{align*}
+	\frac{\density_z(x)}{\density_x(z)} = \exp \parenth{-\frac{\sqrt{\obs\dims}}{2r^2} \parenth{\vecnorm{z-x}{z}^2- \vecnorm{z-x}{x}^2 }+ \frac{1}{2} \parenth{\log \det \vaidyaW_z - \log \det \vaidyaW_x}}.
+\end{align*}
+The following lemma provides us with useful bounds on the two terms in this expression.
+ \begin{lemma}
+ 	\label{lemma:change_in_log_det_and_local_norm}
+ 	For any $\epsilon \in (0, \frac{1}{4}]$ and $x \in \intP$, if $r \leq f(\epsilon)$, we have
+ 	\begin{subequations}
+ 		\begin{align}
+ 			 \Prob_{z\sim \proposal_x}\brackets{\frac{1}{2}\log\det \vaidyaW_z - \frac{1}{2}\log\det \vaidyaW_x \geq -\epsilon } &\geq 1 - \epsilon,
+ 			 \ \text{and}\label{eq:whp_log_det_filter}\\
+ 			 \Prob_{z\sim \proposal_x}\brackets{\vecnorm{z - x}{z}^2 - \vecnorm{z - x}{x}^2 \leq 2 \epsilon \frac{r^2}{\sqrt{\numobs\usedim}} } &\geq 1 - \epsilon \label{eq:whp_local_norm}.
+ 		\end{align}
+ 	\end{subequations}
+ \end{lemma}
+The proof of this lemma is provided in Appendix~\ref{sec:proof_of_lemma_lemma:change_in_log_det_and_local_norm}.
+Using Lemma~\ref{lemma:change_in_log_det_and_local_norm}, we now complete the proof.
+For $r \leq f(\epsilon)$, we obtain $\density_z(x) /\density_x(z) \geq \exp\parenth{-2\epsilon} \geq 1- 2\epsilon$ with probability at least $1-2\epsilon$.
+Substituting $\alpha = 1-2\epsilon$ in inequality~\eqref{eq:markov_inequality} yields the bound $T_2 \leq 4\epsilon$.
+% subsubsection proof_of_claim_eq:delta_q_p (end)
+
+% subsection proof_of_lemma_lemma:vaidya_walk_close_kernel (end)
+
+
+
